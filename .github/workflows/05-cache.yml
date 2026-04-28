@@ -10,7 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1. 캐시 복원 시도
       - name: 캐시 (workflow 파일 기반)
         id: cache
         uses: actions/cache@v4
@@ -20,17 +19,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-mydata-
 
-      # 2. 폴더 없으면 생성
       - name: 디렉토리 준비
         run: mkdir -p ~/cached-data
 
-      # 3. 캐시 결과 확인
-      - name: 캐시 결과 확인
+      - name: 캐시 결과
         run: |
           echo "cache-hit: ${{ steps.cache.outputs.cache-hit }}"
           ls -al ~/cached-data || echo "비어있음"
 
-      # 4. 데이터 생성 (다음 실행에서 캐시됨)
       - name: 데이터 추가
         run: |
           echo "이번 실행 데이터: $(date)" > ~/cached-data/data.txt
