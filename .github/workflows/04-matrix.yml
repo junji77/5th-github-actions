@@ -1,5 +1,3 @@
-# .github/workflows/04-matrix.yml
-
 name: 04. matrix 실습
 on:
   workflow_dispatch
