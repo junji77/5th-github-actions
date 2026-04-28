@@ -1,57 +1,62 @@
-# .github/workflows/05-cache.yml
+# 1. 워크플로우 이름
+name: 05. 종합 실습 (Matrix + Inputs + Cache)
 
-name: 05. cache 기본 사용
+# 2. 실행 조건: 사용자가 버튼을 누를 때 (입력값 포함)
 on:
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      username:
+        description: '작업자 이름'
+        required: true
+        default: 'guest'
+        type: string
 
 jobs:
-  with-cache:
+  total-test:
     runs-on: ubuntu-latest
-    steps:
-      - name: 가짜 캐시 데이터 생성
-        run: |
-          mkdir -p ~/cached-data
-          echo "캐시된 데이터" > ~/cached-data/data.txt
+    
+    # 3. 전략 설정: 매트릭스로 3가지 조합 생성
+    strategy:
+      fail-fast: false # 하나가 실패해도 나머지는 끝까지!
+      matrix:
+        fruits: [Apple, Banana, Kiwi]
 
-      - name: 캐시 시도
-        id: cache
+    steps:
+      # 4. 소스 코드 체크아웃 (hashFiles 사용을 위해 필수)
+      - name: 리포지토리 체크아웃
+        uses: actions/checkout@v4
+
+      # 5. 캐시 설정: 과일별로 각각 다른 캐시 바구니 사용
+      - name: 과일별 캐시 설정
+        id: cache-step
         uses: actions/cache@v4
         with:
-          path: ~/cached-data
-          key: ${{ runner.os }}-mydata-v1
-
-      - name: 캐시 결과 확인
-        run: |
-          echo "캐시 히트 여부: ${{ steps.cache.outputs.cache-hit }}"
-          ls -al ~/cached-data
-name: 05. cache 기본 사용
-on:
-  workflow_dispatch
-
-jobs:
-  with-cache:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: 캐시 (workflow 파일 기반)
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: ~/cached-data
-          key: ${{ runner.os }}-mydata-${{ hashFiles('.github/workflows/05-cache.yml') }}
+          path: ~/fruit-data
+          # 키 값에 과일 이름과 파일 해시를 섞어서 고유하게 만듦
+          key: ${{ runner.os }}-${{ matrix.fruits }}-${{ hashFiles('.github/workflows/05-composite-practice.yml') }}
           restore-keys: |
-            ${{ runner.os }}-mydata-
+            ${{ runner.os }}-${{ matrix.fruits }}-
 
-      - name: 디렉토리 준비
-        run: mkdir -p ~/cached-data
+      # 6. 환경 준비
+      - name: 디렉토리 생성
+        run: mkdir -p ~/fruit-data
 
-      - name: 캐시 결과
+      # 7. 입력값 및 캐시 결과 확인
+      - name: 정보 출력
         run: |
-          echo "cache-hit: ${{ steps.cache.outputs.cache-hit }}"
-          ls -al ~/cached-data || echo "비어있음"
+          echo "작업자: ${{ inputs.username }}"
+          echo "현재 과일: ${{ matrix.fruits }}"
+          echo "캐시 히트 여부: ${{ steps.cache-step.outputs.cache-hit }}"
+          
+          echo "=== 기존 데이터 확인 ==="
+          ls -al ~/fruit-data || echo "데이터가 없습니다."
 
-      - name: 데이터 추가
+      # 8. 데이터 추가 (다음 실행을 위해 저장할 내용)
+      - name: 새로운 데이터 기록
         run: |
-          echo "이번 실행 데이터: $(date)" > ~/cached-data/data.txt
-          ls -al ~/cached-data
+          echo "작업자: ${{ inputs.username }}" > ~/fruit-data/info.txt
+          echo "과일: ${{ matrix.fruits }}" >> ~/fruit-data/info.txt
+          echo "업데이트 시간: $(date)" >> ~/fruit-data/info.txt
+          
+          echo "=== 저장될 데이터 내용 ==="
+          cat ~/fruit-data/info.txt
