@@ -13,3 +13,17 @@ jobs:
       - name: 과일 출력
         run: |
           echo "현재과일: ${{ matrix.fruits }}"
+
+test2:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        fruits: [Apple, Banana]
+        sizes: [Small, Large]
+    steps:
+      - name: 조합 출력
+        run: |
+          echo "과일: ${{ matrix.fruits }}"
+          echo "크기: ${{ matrix.sizes }}"
