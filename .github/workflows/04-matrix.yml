@@ -1,6 +1,6 @@
 name: 04. matrix 실습
 on:
-  workflow_dispatch
+  workflow_dispatch;
 
 jobs:
   test:
