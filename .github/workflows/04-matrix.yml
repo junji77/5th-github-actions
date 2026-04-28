@@ -1,3 +1,4 @@
+```yaml
 name: 04. matrix 실습
 
 on:
@@ -26,3 +27,4 @@ jobs:
         run: |
           echo "과일: ${{ matrix.fruits }}"
           echo "크기: ${{ matrix.sizes }}"
+```
