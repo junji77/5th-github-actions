@@ -1,0 +1,18 @@
+# .github/workflows/06-use-hello.yml
+
+name: 06. Hello Composite 사용
+on:
+  workflow_dispatch
+
+jobs:
+  use:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 체크아웃 (composite action 파일 가져오기)
+        uses: actions/checkout@v4
+
+      - name: Hello Action 호출
+        uses: ./.github/actions/hello-action
+
+      - name: 호출 후 추가 작업
+        run: echo "워크플로우의 다른 작업 진행"
