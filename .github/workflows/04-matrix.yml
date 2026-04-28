@@ -1,8 +1,7 @@
-```yaml
 name: 04. matrix 실습
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
 
 jobs:
   test:
@@ -12,8 +11,7 @@ jobs:
         fruits: [Apple, Banana, Kiwi]
     steps:
       - name: 과일 출력
-        run: |
-          echo "현재과일: ${{ matrix.fruits }}"
+        run: echo "현재과일: ${{ matrix.fruits }}"
 
   test2:
     runs-on: ubuntu-latest
@@ -27,4 +25,3 @@ jobs:
         run: |
           echo "과일: ${{ matrix.fruits }}"
           echo "크기: ${{ matrix.sizes }}"
-```
