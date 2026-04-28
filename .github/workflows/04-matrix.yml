@@ -14,8 +14,7 @@ jobs:
         run: |
           echo "현재과일: ${{ matrix.fruits }}"
 
-test2:
-  test:
+  test2:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
