@@ -1,0 +1,17 @@
+# .github/actions/hello-action/action.yml
+
+name: "Hello Action"
+description: "간단한 인사 출력 Composite Action"
+
+runs:
+  using: "composite"
+  steps:
+    - name: 인사 출력
+      shell: bash
+      run: echo "Hello from Composite Action!"
+
+    - name: 환경 출력
+      shell: bash
+      run: |
+        echo "OS: $RUNNER_OS"
+        echo "Date: $(date)"
