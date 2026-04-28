@@ -1,64 +1,50 @@
-name: CI Pipeline
-
+name: Deploy Simulation
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
+    inputs:
+      app_version:
+        description: '앱 버전'
+        required: true
+        default: '1.0.0'
+        type: string
+      target_env:
+        description: '배포 환경'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      dry_run:
+        description: 'Dry Run 모드'
+        required: true
+        default: true
+        type: boolean
 
 jobs:
-  lint:
+  simulate:
     runs-on: ubuntu-latest
     steps:
-      - name: 린트 실행
-        run: echo "린트 통과"
-
-  unit-test:
-    runs-on: ubuntu-latest
-    needs: lint
-    outputs:
-      passed_count: ${{ steps.count.outputs.value }}
-    steps:
-      - name: 테스트 개수 저장
-        id: count
-        run: echo "value=5" >> $GITHUB_OUTPUT
-
-      - name: 테스트 결과 출력
-        run: echo "테스트 통과: 5/5"
-
-  build:
-    runs-on: ubuntu-latest
-    needs: lint
-    outputs:
-      artifact_name: ${{ steps.set-name.outputs.value }}
-    steps:
-      - name: 아티팩트 이름 저장
-        id: set-name
-        run: echo "value=myapp-${{ github.run_number }}.jar" >> $GITHUB_OUTPUT
-
-      - name: 빌드 결과 출력
-        run: echo "빌드 완료"
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: [unit-test, build]
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: 배포 실행
+      - name: 입력값 확인
         run: |
-          echo "테스트 통과 수: ${{ needs.unit-test.outputs.passed_count }}"
-          echo "배포 아티팩트: ${{ needs.build.outputs.artifact_name }}"
-          echo "배포 환경: production"
+          echo "=== 입력값 ==="
+          echo "버전: ${{ inputs.app_version }}"
+          echo "환경: ${{ inputs.target_env }}"
+          echo "Dry Run: ${{ inputs.dry_run }}"
 
-  notify:
-    runs-on: ubuntu-latest
-    needs: [lint, unit-test, build, deploy]
-    if: always()
-    steps:
-      - name: 파이프라인 결과 요약
+      - name: 배포 정보 조합
+        id: info
         run: |
-          echo "=== 파이프라인 결과 ==="
-          echo "lint: ${{ needs.lint.result }}"
-          echo "unit-test: ${{ needs.unit-test.result }}"
-          echo "build: ${{ needs.build.result }}"
-          echo "deploy: ${{ needs.deploy.result }}"
+          DEPLOY_TARGET="${{ inputs.target_env }}-${{ inputs.app_version }}"
+          COMMAND="deploy --env ${{ inputs.target_env }} --version ${{ inputs.app_version }} --user ${{ vars.DEPLOY_USER }}"
+          echo "deploy_target=$DEPLOY_TARGET" >> $GITHUB_OUTPUT
+          echo "command=$COMMAND" >> $GITHUB_OUTPUT
+
+      - name: 배포 명령어 출력 (시뮬레이션)
+        run: |
+          echo "=== 배포 시뮬레이션 ==="
+          echo "Target: ${{ steps.info.outputs.deploy_target }}"
+          echo "User: ${{ vars.DEPLOY_USER }}"
+          echo "Token: ${{ secrets.DEPLOY_TOKEN }}"
+          echo "Command: ${{ steps.info.outputs.command }}"
+          echo "Dry Run: ${{ inputs.dry_run }}"
