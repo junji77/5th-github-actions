@@ -1,6 +1,6 @@
 # .github/workflows/05-multi-report.yml
 
-name: Multi Report Collector
+name: 04.Multi Report Collector
 
 on:
   workflow_dispatch:
