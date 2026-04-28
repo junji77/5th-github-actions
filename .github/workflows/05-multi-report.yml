@@ -1,20 +1,18 @@
-# .github/workflows/05-multi-report.yml
-
-name: 05.Multi Report Collector
-
+name: Multi Report Collector
 on:
-  workflow_dispatch:
+  workflow_dispatch
 
 jobs:
   unit-test:
     runs-on: ubuntu-latest
     steps:
-      - name: 단위 테스트 리포트 생성
+      - name: 단위 테스트 결과 생성
         run: |
           mkdir -p reports/unit
-          echo "단위 테스트 통과 5/5, 실행 번호: ${{ github.run_number }}" > reports/unit/result.txt
+          echo "단위 테스트 통과 5/5" > reports/unit/result.txt
+          echo "실행 번호: ${{ github.run_number }}" >> reports/unit/result.txt
 
-      - name: 단위 테스트 Artifact 업로드
+      - name: 단위 리포트 업로드
         uses: actions/upload-artifact@v4
         with:
           name: unit-report-${{ github.run_number }}
@@ -24,12 +22,13 @@ jobs:
   integration-test:
     runs-on: ubuntu-latest
     steps:
-      - name: 통합 테스트 리포트 생성
+      - name: 통합 테스트 결과 생성
         run: |
           mkdir -p reports/integration
-          echo "통합 테스트 통과 3/3, 실행 번호: ${{ github.run_number }}" > reports/integration/result.txt
+          echo "통합 테스트 통과 3/3" > reports/integration/result.txt
+          echo "실행 번호: ${{ github.run_number }}" >> reports/integration/result.txt
 
-      - name: 통합 테스트 Artifact 업로드
+      - name: 통합 리포트 업로드
         uses: actions/upload-artifact@v4
         with:
           name: integration-report-${{ github.run_number }}
@@ -37,16 +36,16 @@ jobs:
           retention-days: 3
 
   summary:
-    runs-on: ubuntu-latest
     needs: [unit-test, integration-test]
+    runs-on: ubuntu-latest
     steps:
-      - name: 단위 테스트 리포트 다운로드
+      - name: 단위 리포트 다운로드
         uses: actions/download-artifact@v4
         with:
           name: unit-report-${{ github.run_number }}
           path: ./unit
 
-      - name: 통합 테스트 리포트 다운로드
+      - name: 통합 리포트 다운로드
         uses: actions/download-artifact@v4
         with:
           name: integration-report-${{ github.run_number }}
